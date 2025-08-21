@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economics Simulation for Microeconomics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            margin: 0 5px;
+            background-color: #ddd;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-bottom: none;
+        }
+        .section {
+            display: none;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 0 0 5px 5px;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+        .section.active {
+            display: block;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #000;
+            background-color: #fff;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .controls label {
+            margin-right: 10px;
+        }
+        .controls input[type="range"] {
+            width: 200px;
+        }
+        .controls button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .controls button:hover {
+            background-color: #45a049;
+        }
+        .output {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .description {
+            margin: 10px 0;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Microeconomics Simulation</h1>
+    <p style="text-align: center;">This simulation helps students explore key microeconomic concepts through interactive graphs and scenarios. Use the tabs to navigate between sections.</p>
+
+    <div class="tab-container">
+        <div class="tab active" onclick="openTab('demand-supply')">Demand & Supply</div>
+        <div class="tab" onclick="openTab('surplus')">Consumer & Producer Surplus</div>
+        <div class="tab" onclick="openTab('interventions')">Government Interventions</div>
+        <div class="tab" onclick="openTab('ppc')">PPC Graphs</div>
+        <div class="tab" onclick="openTab('systems')">Economic Systems</div>
+    </div>
+
+    <div id="demand-supply" class="section active">
+        <h2>Demand and Supply Simulation</h2>
+        <p class="description">Adjust factors like consumer income (affects demand) and production costs (affects supply) to see how market participant decisions shift the curves and change the equilibrium price and quantity.</p>
+        <div class="controls">
+            <label>Consumer Income (Demand Shift): <input type="range" id="income" min="0" max="100" value="50"></label><br>
+            <label>Production Costs (Supply Shift): <input type="range" id="costs" min="0" max="100" value="50"></label><br>
+            <button onclick="updateDemandSupplyGraph()">Update Graph</button>
+        </div>
+        <canvas id="dsCanvas" width="600" height="400"></canvas>
+        <div class="output" id="dsOutput"></div>
+    </div>
+
+    <div id="surplus" class="section">
+        <h2>Consumer and Producer Surplus</h2>
+        <p class="description">Based on the demand and supply equilibrium, visualize the areas representing consumer surplus (above price, below demand) and producer surplus (below price, above supply).</p>
+        <div class="controls">
+            <label>Demand Slope: <input type="range" id="demandSlope" min="1" max="10" value="5"></label><br>
+            <label>Supply Slope: <input type="range" id="supplySlope" min="1" max="10" value="5"></label><br>
+            <button onclick="updateSurplusGraph()">Update Graph</button>
+        </div>
+        <canvas id="surplusCanvas" width="600" height="400"></canvas>
+        <div class="output" id="surplusOutput"></div>
+    </div>
+
+    <div id="interventions" class="section">
+        <h2>Government Interventions</h2>
+        <p class="description">Apply interventions like taxes (shifts supply left) or subsidies (shifts supply right), price ceilings, or floors, and see impacts on equilibrium and surpluses.</p>
+        <div class="controls">
+            <label>Tax Amount: <input type="range" id="tax" min="0" max="50" value="0"></label><br>
+            <label>Subsidy Amount: <input type="range" id="subsidy" min="0" max="50" value="0"></label><br>
+            <label>Price Ceiling: <input type="range" id="ceiling" min="0" max="100" value="100"></label><br>
+            <button onclick="updateInterventionsGraph()">Update Graph</button>
+        </div>
+        <canvas id="interventionsCanvas" width="600" height="400"></canvas>
+        <div class="output" id="interventionsOutput"></div>
+    </div>
+
+    <div id="ppc" class="section">
+        <h2>Production Possibility Curve (PPC)</h2>
+        <p class="description">Adjust production efficiency for two goods to see the PPC shift. Points inside represent inefficiency, on the curve efficiency, outside unattainable.</p>
+        <div class="controls">
+            <label>Good A Efficiency: <input type="range" id="goodA" min="0" max="100" value="50"></label><br>
+            <label>Good B Efficiency: <input type="range" id="goodB" min="0" max="100" value="50"></label><br>
+            <button onclick="updatePPCGraph()">Update Graph</button>
+        </div>
+        <canvas id="ppcCanvas" width="600" height="400"></canvas>
+        <div class="output" id="ppcOutput"></div>
+    </div>
+
+    <div id="systems" class="section">
+        <h2>Different Economic Systems</h2>
+        <p class="description">Compare systems: In capitalism, individual decisions drive supply/demand. In socialism, central planning sets prices/quantities. Adjust parameters to simulate outcomes.</p>
+        <div class="controls">
+            <label>System Type: 
+                <select id="systemType">
+                    <option value="capitalism">Capitalism</option>
+                    <option value="socialism">Socialism</option>
+                </select>
+            </label><br>
+            <label>Demand Level: <input type="range" id="systemDemand" min="0" max="100" value="50"></label><br>
+            <button onclick="updateSystemsGraph()">Update Simulation</button>
+        </div>
+        <canvas id="systemsCanvas" width="600" height="400"></canvas>
+        <div class="output" id="systemsOutput"></div>
+    </div>
+
+    <script>
+        function openTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            const sections = document.querySelectorAll('.section');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            sections.forEach(section => section.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Demand & Supply Graph
+        function updateDemandSupplyGraph() {
+            const canvas = document.getElementById('dsCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const income = parseInt(document.getElementById('income').value);
+            const costs = parseInt(document.getElementById('costs').value);
+
+            // Simple linear equations: Demand P = 100 - 0.5Q + income/2, Supply P = 20 + 0.5Q + costs/2
+            const demandIntercept = 100 + income / 2;
+            const supplyIntercept = 20 + costs / 2;
+
+            // Draw axes
+            ctx.save();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 350); // X-axis
+            ctx.lineTo(550, 350);
+            ctx.moveTo(50, 350); // Y-axis
+            ctx.lineTo(50, 50);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.restore();
+
+            // Labels
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText('Quantity', 500, 370);
+            ctx.fillText('Price', 10, 60);
+
+            // Draw demand curve
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - demandIntercept * 1.5); // Q=0
+            ctx.lineTo(350, 350 - (demandIntercept - 100) * 1.5); // Q=600
+            ctx.stroke();
+            ctx.fillStyle = 'blue';
+            ctx.fillText('Demand', 360, 350 - (demandIntercept - 100) * 1.5 + 10);
+
+            // Draw supply curve
+            ctx.strokeStyle = 'red';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - supplyIntercept * 1.5);
+            ctx.lineTo(350, 350 - (supplyIntercept + 100) * 1.5);
+            ctx.stroke();
+            ctx.fillStyle = 'red';
+            ctx.fillText('Supply', 360, 350 - (supplyIntercept + 100) * 1.5 + 10);
+
+            // Find equilibrium (solve 100 - 0.5Q + i/2 = 20 + 0.5Q + c/2)
+            const eqQ = (demandIntercept - supplyIntercept) / 1;
+            const eqP = supplyIntercept + 0.5 * eqQ;
+            document.getElementById('dsOutput').innerHTML = `Equilibrium Price: <b>${eqP.toFixed(2)}</b>, Quantity: <b>${eqQ.toFixed(2)}</b>`;
+
+            // Mark equilibrium
+            ctx.strokeStyle = 'green';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(50 + eqQ * 2, 350); // Scale Q
+            ctx.lineTo(50 + eqQ * 2, 350 - eqP * 1.5);
+            ctx.lineTo(50, 350 - eqP * 1.5);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw equilibrium point
+            ctx.fillStyle = 'green';
+            ctx.beginPath();
+            ctx.arc(50 + eqQ * 2, 350 - eqP * 1.5, 6, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // Consumer & Producer Surplus Graph
+        function updateSurplusGraph() {
+            const canvas = document.getElementById('surplusCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const dSlope = parseInt(document.getElementById('demandSlope').value);
+            const sSlope = parseInt(document.getElementById('supplySlope').value);
+
+            // Demand P = 100 - dSlope*0.1 Q, Supply P = 20 + sSlope*0.1 Q
+            const maxQ = 600;
+            const eqQ = (100 - 20) / (dSlope*0.1 + sSlope*0.1);
+            const eqP = 20 + sSlope*0.1 * eqQ;
+
+            // Draw axes
+            ctx.save();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 350); // X-axis
+            ctx.lineTo(550, 350);
+            ctx.moveTo(50, 350); // Y-axis
+            ctx.lineTo(50, 50);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.restore();
+
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText('Quantity', 500, 370);
+            ctx.fillText('Price', 10, 60);
+
+            // Demand curve
+            ctx.strokeStyle = 'blue';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - 100 * 2);
+            ctx.lineTo(50 + eqQ * 2, 350 - eqP * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'blue';
+            ctx.fillText('Demand', 360, 350 - eqP * 2 + 10);
+
+            // Supply curve
+            ctx.strokeStyle = 'red';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - 20 * 2);
+            ctx.lineTo(50 + eqQ * 2, 350 - eqP * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'red';
+            ctx.fillText('Supply', 360, 350 - eqP * 2 + 30);
+
+            // Consumer Surplus area (triangle above eqP, below demand)
+            ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - 100 * 2); // Demand intercept
+            ctx.lineTo(50 + eqQ * 2, 350 - eqP * 2); // Equilibrium
+            ctx.lineTo(50 + eqQ * 2, 350 - eqP * 2); // Equilibrium
+            ctx.lineTo(50, 350 - eqP * 2); // Horizontal at eqP
+            ctx.closePath();
+            ctx.fill();
+
+            // Producer Surplus area (triangle below eqP, above supply)
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - 20 * 2); // Supply intercept
+            ctx.lineTo(50 + eqQ * 2, 350 - eqP * 2); // Equilibrium
+            ctx.lineTo(50, 350 - eqP * 2); // Horizontal at eqP
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw equilibrium point
+            ctx.fillStyle = 'green';
+            ctx.beginPath();
+            ctx.arc(50 + eqQ * 2, 350 - eqP * 2, 6, 0, 2 * Math.PI);
+            ctx.fill();
+
+            const cs = 0.5 * eqQ * (100 - eqP);
+            const ps = 0.5 * eqQ * (eqP - 20);
+            document.getElementById('surplusOutput').innerHTML = `Consumer Surplus: <b>${cs.toFixed(2)}</b>, Producer Surplus: <b>${ps.toFixed(2)}</b>`;
+        }
+
+        // Government Interventions Graph
+        function updateInterventionsGraph() {
+            const canvas = document.getElementById('interventionsCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const tax = parseInt(document.getElementById('tax').value);
+            const subsidy = parseInt(document.getElementById('subsidy').value);
+            const ceiling = parseInt(document.getElementById('ceiling').value);
+
+            // Base supply: P = 20 + 0.5Q
+            // Apply tax (shifts up) and subsidy (shifts down)
+            const supplyIntercept = 20 + tax - subsidy;
+            const demandIntercept = 100;
+
+            // Find equilibrium
+            // 100 - 0.5Q = supplyIntercept + 0.5Q
+            const eqQ = (100 - supplyIntercept) / 1;
+            let eqP = supplyIntercept + 0.5 * eqQ;
+
+            // Apply price ceiling if below equilibrium
+            let ceilingActive = false;
+            if (ceiling < eqP) {
+                eqP = ceiling;
+                ceilingActive = true;
+            }
+
+            // Draw axes
+            ctx.save();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 350); // X-axis
+            ctx.lineTo(550, 350);
+            ctx.moveTo(50, 350); // Y-axis
+            ctx.lineTo(50, 50);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.restore();
+
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText('Quantity', 500, 370);
+            ctx.fillText('Price', 10, 60);
+
+            // Demand curve
+            ctx.strokeStyle = 'blue';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - demandIntercept * 1.5);
+            ctx.lineTo(350, 350 - (demandIntercept - 100) * 1.5);
+            ctx.stroke();
+            ctx.fillStyle = 'blue';
+            ctx.fillText('Demand', 360, 350 - (demandIntercept - 100) * 1.5 + 10);
+
+            // Supply curve
+            ctx.strokeStyle = 'red';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - supplyIntercept * 1.5);
+            ctx.lineTo(350, 350 - (supplyIntercept + 100) * 1.5);
+            ctx.stroke();
+            ctx.fillStyle = 'red';
+            ctx.fillText('Supply', 360, 350 - (supplyIntercept + 100) * 1.5 + 10);
+
+            // Draw price ceiling
+            if (ceilingActive) {
+                ctx.strokeStyle = 'orange';
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(50, 350 - ceiling * 1.5);
+                ctx.lineTo(550, 350 - ceiling * 1.5);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = 'orange';
+                ctx.fillText('Ceiling', 500, 350 - ceiling * 1.5 - 5);
+            }
+
+            // Mark equilibrium
+            ctx.strokeStyle = 'green';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(50 + eqQ * 2, 350); // Scale Q
+            ctx.lineTo(50 + eqQ * 2, 350 - eqP * 1.5);
+            ctx.lineTo(50, 350 - eqP * 1.5);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw equilibrium point
+            ctx.fillStyle = 'green';
+            ctx.beginPath();
+            ctx.arc(50 + eqQ * 2, 350 - eqP * 1.5, 6, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Deadweight loss (if ceiling active)
+            let dwl = 0;
+            if (ceilingActive) {
+                // Qd at ceiling: 100 - 0.5Q = ceiling => Qd = (100 - ceiling)/0.5
+                // Qs at ceiling: P = supplyIntercept + 0.5Q => Qs = (ceiling - supplyIntercept)/0.5
+                const Qd = (100 - ceiling) / 0.5;
+                const Qs = (ceiling - supplyIntercept) / 0.5;
+                dwl = 0.5 * (Qd - Qs) * (eqP - ceiling);
+                ctx.fillStyle = 'rgba(255,165,0,0.3)';
+                ctx.beginPath();
+                ctx.moveTo(50 + Qs * 2, 350 - ceiling * 1.5);
+                ctx.lineTo(50 + Qd * 2, 350 - ceiling * 1.5);
+                ctx.lineTo(50 + eqQ * 2, 350 - eqP * 1.5);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            document.getElementById('interventionsOutput').innerHTML = `Equilibrium Price: <b>${eqP.toFixed(2)}</b>, Quantity: <b>${eqQ.toFixed(2)}</b>${ceilingActive ? `<br>Price ceiling active. Deadweight loss: <b>${dwl.toFixed(2)}</b>` : ''}`;
+        }
+
+        // PPC Graph
+        function updatePPCGraph() {
+            const canvas = document.getElementById('ppcCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const goodA = parseInt(document.getElementById('goodA').value);
+            const goodB = parseInt(document.getElementById('goodB').value);
+
+            // PPC: concave curve, max A = 100 + goodA, max B = 100 + goodB
+            const maxA = 100 + goodA;
+            const maxB = 100 + goodB;
+
+            // Draw axes
+            ctx.save();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 350);
+            ctx.lineTo(550, 350);
+            ctx.moveTo(50, 350);
+            ctx.lineTo(50, 50);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.restore();
+
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText('Good A', 500, 370);
+            ctx.fillText('Good B', 10, 60);
+
+            // Draw PPC curve (concave)
+            ctx.strokeStyle = 'purple';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let a = 0; a <= maxA; a += 2) {
+                // B = sqrt(maxB^2 - (maxB/maxA * a)^2) for concave
+                let b = maxB * Math.sqrt(1 - (a / maxA) ** 2);
+                let x = 50 + a * 2;
+                let y = 350 - b * 1.5;
+                if (a === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Mark efficient point (on curve)
+            ctx.fillStyle = 'green';
+            ctx.beginPath();
+            ctx.arc(50 + maxA * 1, 350 - maxB * 1.5 * Math.sqrt(0.5), 7, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Mark inefficient point (inside curve)
+            ctx.fillStyle = 'orange';
+            ctx.beginPath();
+            ctx.arc(50 + maxA * 0.7, 350 - maxB * 1.5 * 0.5, 7, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Mark unattainable point (outside curve)
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(50 + maxA * 1.1, 350 - maxB * 1.5 * 1.1, 7, 0, 2 * Math.PI);
+            ctx.fill();
+
+            document.getElementById('ppcOutput').innerHTML = `Max Good A: <b>${maxA}</b>, Max Good B: <b>${maxB}</b>. <span style="color:green">Green</span>: efficient, <span style="color:orange">Orange</span>: inefficient, <span style="color:red">Red</span>: unattainable.`;
+        }
+
+        // Economic Systems Simulation
+        function updateSystemsGraph() {
+            const system = document.getElementById('systemType').value;
+            const demand = parseInt(document.getElementById('systemDemand').value);
+
+            const canvas = document.getElementById('systemsCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw axes
+            ctx.save();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(80, 350);
+            ctx.lineTo(350, 350);
+            ctx.moveTo(80, 350);
+            ctx.lineTo(80, 100);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.restore();
+
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText('Output', 300, 370);
+            ctx.fillText('Level', 30, 120);
+
+            // Demand bar
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(120, 350 - demand * 2, 50, demand * 2);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Demand', 120, 370);
+
+            if (system === 'capitalism') {
+                // Supply matches demand
+                ctx.fillStyle = 'red';
+                ctx.fillRect(220, 350 - demand * 2, 50, demand * 2);
+                ctx.fillStyle = '#333';
+                ctx.fillText('Supply', 220, 370);
+                ctx.fillStyle = 'green';
+                ctx.fillText('Market clears at equilibrium.', 120, 90);
+                document.getElementById('systemsOutput').innerHTML = 'In Capitalism: Market clears at equilibrium.';
+            } else {
+                // Fixed supply, say 50
+                ctx.fillStyle = 'red';
+                ctx.fillRect(220, 350 - 100, 50, 100);
+                ctx.fillStyle = '#333';
+                ctx.fillText('Supply', 220, 370);
+                if (demand > 50) {
+                    ctx.fillStyle = 'orange';
+                    ctx.fillText('Shortage!', 120, 90);
+                } else {
+                    ctx.fillStyle = 'green';
+                    ctx.fillText('No shortage.', 120, 90);
+                }
+                document.getElementById('systemsOutput').innerHTML = 'In Socialism: Possible shortage if demand > planned supply.';
+            }
+        }
+
+        // Tooltip for canvas (optional, for better interactivity)
+        function addCanvasTooltip(canvas, getText) {
+            canvas.onmousemove = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                canvas.title = getText(x, y);
+            };
+        }
+
+        // Initialize graphs on load
+        updateDemandSupplyGraph();
+        updateSurplusGraph();
+        updateInterventionsGraph();
+        updatePPCGraph();
+        updateSystemsGraph();
+
+        // Add tooltips for each canvas (optional, can be removed if not needed)
+        addCanvasTooltip(document.getElementById('dsCanvas'), (x, y) => `Move sliders and click Update to see new equilibrium.`);
+        addCanvasTooltip(document.getElementById('surplusCanvas'), (x, y) => `Blue: Consumer Surplus, Red: Producer Surplus.`);
+        addCanvasTooltip(document.getElementById('interventionsCanvas'), (x, y) => `Orange: Deadweight loss if ceiling active.`);
+        addCanvasTooltip(document.getElementById('ppcCanvas'), (x, y) => `Green: Efficient, Orange: Inefficient, Red: Unattainable.`);
+        addCanvasTooltip(document.getElementById('systemsCanvas'), (x, y) => `Compare demand and supply bars.`);
+    </script>
+</body>
+</html>
